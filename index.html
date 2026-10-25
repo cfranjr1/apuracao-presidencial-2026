@@ -81,7 +81,12 @@ function renderPair(target,arr){
  $(target).innerHTML=arr.map((c,i)=>{const p=c.percent|| (total?c.votes/total*100:0);return `<div class="candidate"><div><strong>${esc(c.name)}</strong><div class="party">${esc(c.party)}</div></div><div class="percent">${pct(p)}</div></div><div class="bar"><div class="fill ${i===1?'green':''}" style="width:${Math.max(0,Math.min(100,p))}%"></div></div><div class="votes">${fmt(c.votes)} votos</div>${i===0?'<div style="height:15px"></div>':''}`}).join('');
 }
 function progress(data){const s=data?.s||{};return {done:Number(s.st||0),total:Number(s.ts||0),percent:Number(String(s.pst||'0').replace(',','.'))||0}}
-async function getResult(code,uf){const u=uf.toLowerCase();const url=`${BASE}/ele2026/${code}/dados/${u}/${u}-c0001-e${code}-u.json`;return json(url)}
+async function getResult(code,uf){
+  const u=uf.toLowerCase();
+  const election=String(code).padStart(6,'0');
+  const url=`${BASE}/ele2026/${code}/dados/${u}/${u}-c0001-e${election}-u.json`;
+  return json(url);
+}
 function setTurn(n){turn=n;$('turn1').setAttribute('aria-pressed',String(n===1));$('turn2').setAttribute('aria-pressed',String(n===2));$('turn1').style.background=n===1?'#214777':'';$('turn2').style.background=n===2?'#214777':'';refresh()}
 async function refresh(){if(busy)return;busy=true;$('status').textContent=`Consultando o ${DATES[turn]} no TSE…`;$('updated').textContent=new Date().toLocaleString('pt-BR');
  try{
