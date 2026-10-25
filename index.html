@@ -138,7 +138,7 @@ async function refresh(){if(busy)return;busy=true;$('status').textContent=`Consu
   const nat=await getResult(code,'br');
   const pair=candidatesFrom(nat);
   if(pair.length<2)throw new Error('O arquivo do TSE foi acessado, mas não há dois candidatos com votos válidos para exibir neste momento.');
-  lastGood={nat,pair,code,turn};renderPair('national',pair);$('margin').textContent=fmt(Math.abs(pair[0].votes-pair[1].votes));
+  lastGood={nat,pair,code,turn};renderPair('national',pair);
   const pr=progress(nat);$('sections').textContent=pr.total?`${fmt(pr.done)} / ${fmt(pr.total)}`:'—';$('progress').textContent=pr.percent?pct(pr.percent):'—';
   $('diagnostic').textContent=`Fonte oficial do TSE consultada. Código da eleição: ${code}. Turno selecionado: ${turn}. Os dados estaduais são consultados separadamente.`;
   const rows=[];
