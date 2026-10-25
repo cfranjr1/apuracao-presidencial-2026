@@ -20,6 +20,7 @@ main{max-width:1200px;margin:auto;padding:20px 14px 40px}.status{display:flex;fl
   <p>Dados eleitorais oficiais, com acompanhamento nacional e por estado. Consulte sempre a fonte oficial do Tribunal Superior Eleitoral.</p>
 </header>
 <main>
+  <div class="actions" style="margin-bottom:14px"><button id="turn1" aria-pressed="true">1º turno · 4 de outubro</button><button id="turn2" aria-pressed="false">2º turno · 25 de outubro</button></div>
   <div class="status"><span id="status">Conectando à fonte oficial do TSE…</span><span>Atualização automática: a cada 30 segundos</span></div>
   <div class="grid">
     <section class="panel">
@@ -51,87 +52,55 @@ main{max-width:1200px;margin:auto;padding:20px 14px 40px}.status{display:flex;fl
 </main>
 <script>
 const BASE='https://resultados.tse.jus.br/oficial';
+const ELECTIONS={1:'6257',2:'6258'};
+const DATES={1:'1º turno · 4 de outubro de 2026',2:'2º turno · 25 de outubro de 2026'};
 const STATES=[['AC','Acre'],['AL','Alagoas'],['AP','Amapá'],['AM','Amazonas'],['BA','Bahia'],['CE','Ceará'],['DF','Distrito Federal'],['ES','Espírito Santo'],['GO','Goiás'],['MA','Maranhão'],['MT','Mato Grosso'],['MS','Mato Grosso do Sul'],['MG','Minas Gerais'],['PA','Pará'],['PB','Paraíba'],['PR','Paraná'],['PE','Pernambuco'],['PI','Piauí'],['RJ','Rio de Janeiro'],['RN','Rio Grande do Norte'],['RS','Rio Grande do Sul'],['RO','Rondônia'],['RR','Roraima'],['SC','Santa Catarina'],['SP','São Paulo'],['SE','Sergipe'],['TO','Tocantins']];
 const $=id=>document.getElementById(id);
 const fmt=n=>Number(n||0).toLocaleString('pt-BR');
-const pct=n=>(Number(n||0)).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+'%';
-let lastGood=null;
-async function json(url){const r=await fetch(url,{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status+' ao consultar '+url);return r.json()}
-function findVal(obj,keys){for(const k of keys){if(obj&&obj[k]!==undefined&&obj[k]!==null&&obj[k]!=='')return obj[k]}return null}
+const pct=n=>Number(n||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+'%';
+let turn=2, lastGood=null, busy=false;
+async function json(url){const r=await fetch(url,{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status+' ao consultar arquivo oficial');return r.json()}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function candidatesFrom(data){
- let arr=data?.cand||data?.candidatos||data?.cands||data?.resultados||[];
- if(!Array.isArray(arr)&&arr&&typeof arr==='object')arr=Object.values(arr);
- return arr.filter(x=>x&&typeof x==='object').map(x=>({
- name:String(findVal(x,['nm','nome','nmu','nomeCandidato','cand'])||'Candidato'),
- party:String(findVal(x,['cc','partido','sgp','part'])||''),
- votes:Number(findVal(x,['vap','votos','votosNominais','tv'])||0),
- percent:Number(String(findVal(x,['pvap','percentual','pct'])||0).replace(',','.'))
- })).sort((a,b)=>b.votes-a.votes).slice(0,2)
+ const cargo=(data?.carg||[]).find(c=>String(c.cd)==='1') || (data?.carg||[])[0];
+ const out=[];
+ function walk(x,party=''){
+  if(!x||typeof x!=='object')return;
+  if(Array.isArray(x)){x.forEach(v=>walk(v,party));return;}
+  const hereParty=x.sg||x.nm||party;
+  if(x.vap!==undefined && (x.nmu||x.nm)) out.push({name:x.nmu||x.nm,party:x.sg||party||'',votes:Number(String(x.vap).replace(/\./g,'').replace(',','.'))||0,percent:Number(String(x.pvap||'0').replace(',','.'))||0});
+  for(const [k,v] of Object.entries(x)) if(k!=='vs') walk(v,hereParty);
+ }
+ walk(cargo?.agr||cargo?.cand||cargo?.candidatos||cargo);
+ const seen=new Set();
+ return out.filter(c=>{const k=c.name+'|'+c.votes;if(seen.has(k))return false;seen.add(k);return true}).sort((a,b)=>b.votes-a.votes).slice(0,2);
 }
 function renderPair(target,arr){
- if(!arr||!arr.length){$(target).innerHTML='<p class="note">A fonte ainda não disponibilizou os dados esperados para esta abrangência.</p>';return}
+ if(!arr||!arr.length){$(target).innerHTML='<p class="note">O TSE ainda não disponibilizou dados utilizáveis para esta abrangência.</p>';return}
  const total=arr.reduce((s,c)=>s+c.votes,0);
  $(target).innerHTML=arr.map((c,i)=>{const p=c.percent|| (total?c.votes/total*100:0);return `<div class="candidate"><div><strong>${esc(c.name)}</strong><div class="party">${esc(c.party)}</div></div><div class="percent">${pct(p)}</div></div><div class="bar"><div class="fill ${i===1?'green':''}" style="width:${Math.max(0,Math.min(100,p))}%"></div></div><div class="votes">${fmt(c.votes)} votos</div>${i===0?'<div style="height:15px"></div>':''}`}).join('');
 }
-function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function getElectionCode(cfg){
- const arr=cfg?.ele||cfg?.eleicoes||cfg?.elections||[];
- const list=Array.isArray(arr)?arr:Object.values(arr);
- const e=list.find(x=>String(x?.cd||x?.codigo||x?.id||'').includes('6258'))||list.find(x=>/2026/.test(JSON.stringify(x))&&/2.?turno|segundo turno/i.test(JSON.stringify(x)));
- return e?String(findVal(e,['cd','codigo','id'])||''):'';
-}
-async function getConfig(){
- const urls=[`${BASE}/ele2026/comum/config/ele-c.json`,`${BASE}/comum/config/ele-c.json`];
- let errors=[];
- for(const u of urls){try{return {cfg:await json(u),url:u}}catch(e){errors.push(e.message)}}
- throw new Error('Não foi possível ler a configuração eleitoral oficial pelo navegador. '+errors.join(' | '));
-}
-async function getResult(code,uf){
- const prefix=uf.toLowerCase();
- const paths=[
- `${BASE}/ele2026/${code}/dados/${prefix}/${prefix}-c0001-e${String(code).padStart(6,'0')}-u.json`,
- `${BASE}/ele2026/${code}/dados/${prefix}/${prefix}-c0001-e${String(code).padStart(6,'0')}-u.json`
- ];
- let err;
- for(const u of paths){try{return await json(u)}catch(e){err=e}}
- throw err||new Error('Arquivo de resultado não encontrado');
-}
-function getProgress(data){
- const a=data?.s||data?.secoes||data?.abrangencia||{};
- const done=findVal(a,['st','secoesTotalizadas','sct']);
- const total=findVal(a,['se','secoes','secoesEsperadas']);
- if(done!==null&&total!==null&&Number(total)>0)return {text:`${pct(Number(done)/Number(total)*100)}`,done,total};
- return {text:'—',done:null,total:null}
-}
-async function refresh(){
- $('status').textContent='Consultando arquivos oficiais do TSE…';$('updated').textContent=new Date().toLocaleString('pt-BR');
+function progress(data){const s=data?.s||{};return {done:Number(s.st||0),total:Number(s.ts||0),percent:Number(String(s.pst||'0').replace(',','.'))||0}}
+async function getResult(code,uf){const u=uf.toLowerCase();const url=`${BASE}/ele2026/${code}/dados/${u}/${u}-c0001-e${code}-u.json`;return json(url)}
+function setTurn(n){turn=n;$('turn1').setAttribute('aria-pressed',String(n===1));$('turn2').setAttribute('aria-pressed',String(n===2));$('turn1').style.background=n===1?'#214777':'';$('turn2').style.background=n===2?'#214777':'';refresh()}
+async function refresh(){if(busy)return;busy=true;$('status').textContent=`Consultando o ${DATES[turn]} no TSE…`;$('updated').textContent=new Date().toLocaleString('pt-BR');
  try{
-  const {cfg}=await getConfig();
-  let code=getElectionCode(cfg);
-  if(!code) throw new Error('A configuração foi acessada, mas não foi possível identificar automaticamente o código do pleito presidencial de 2026. Para evitar misturar turnos, os números não serão exibidos.');
+  const code=ELECTIONS[turn];
   const nat=await getResult(code,'br');
   const pair=candidatesFrom(nat);
-  if(pair.length<2) throw new Error('O arquivo nacional respondeu, mas o formato dos candidatos não correspondeu ao esperado. Nenhum número foi inventado.');
-  lastGood={nat,pair,code};
-  renderPair('national',pair);
-  $('margin').textContent=fmt(Math.abs(pair[0].votes-pair[1].votes));
-  const prog=getProgress(nat);$('sections').textContent=prog.done!==null?`${fmt(prog.done)} / ${fmt(prog.total)}`:'—';$('progress').textContent=prog.text;
-  $('diagnostic').textContent=`Arquivo nacional acessado. Código eleitoral identificado: ${code}. Os arquivos estaduais serão verificados individualmente.`;
-  $('status').textContent='Fonte oficial consultada com sucesso';$('status').className='';
+  if(pair.length<2)throw new Error('O arquivo do TSE foi acessado, mas não há dois candidatos com votos válidos para exibir neste momento.');
+  lastGood={nat,pair,code,turn};renderPair('national',pair);$('margin').textContent=fmt(Math.abs(pair[0].votes-pair[1].votes));
+  const pr=progress(nat);$('sections').textContent=pr.total?`${fmt(pr.done)} / ${fmt(pr.total)}`:'—';$('progress').textContent=pr.percent?pct(pr.percent):'—';
+  $('diagnostic').textContent=`Fonte oficial do TSE consultada. Código da eleição: ${code}. Turno selecionado: ${turn}. Os dados estaduais são consultados separadamente.`;
   const rows=[];
-  for(const [uf,name] of STATES){
-   try{const d=await getResult(code,uf);const p=candidatesFrom(d);if(p.length>=2){rows.push({uf,name,p});if(uf==='RR')renderPair('rr',p)}}
-   catch(e){/* state data may not yet be available */ }
-  }
-  $('states').innerHTML=rows.length?rows.map(r=>`<tr><td class="state">${r.uf} <span class="small">${esc(r.name)}</span></td><td>${fmt(r.p[0].votes)}<br><span class="small">${pct(r.p[0].percent)}</span></td><td>${fmt(r.p[1].votes)}<br><span class="small">${pct(r.p[1].percent)}</span></td><td><span class="tag">${esc(r.p[0].name)}</span></td><td>${fmt(Math.abs(r.p[0].votes-r.p[1].votes))}</td></tr>`).join(''):'<tr><td colspan="5">Os dados estaduais ainda não estão disponíveis ou o navegador não conseguiu acessá-los.</td></tr>';
- }catch(e){
-  $('status').textContent='Conexão oficial ainda não validada';$('status').className='error';
-  $('diagnostic').textContent=e.message+' Isso pode ocorrer por bloqueio CORS do navegador, configuração ainda indisponível ou mudança no formato do arquivo. Abra o link oficial para confirmar a apuração.';
-  if(!lastGood){$('national').innerHTML='<p class="error">Dados oficiais não carregados. Nenhum resultado fictício será exibido.</p>';$('rr').innerHTML='<p class="note">Aguardando acesso aos dados oficiais.</p>';$('states').innerHTML='<tr><td colspan="5">Sem dados confirmados.</td></tr>'}
- }
+  for(const [uf,name] of STATES){try{const d=await getResult(code,uf);const p=candidatesFrom(d);if(p.length>=2){rows.push({uf,name,p});if(uf==='RR')renderPair('rr',p)}}catch(e){}}
+  $('states').innerHTML=rows.length?rows.map(r=>`<tr><td class="state">${r.uf} <span class="small">${esc(r.name)}</span></td><td>${fmt(r.p[0].votes)}<br><span class="small">${pct(r.p[0].percent)}</span></td><td>${fmt(r.p[1].votes)}<br><span class="small">${pct(r.p[1].percent)}</span></td><td><span class="tag">${esc(r.p[0].name)}</span></td><td>${fmt(Math.abs(r.p[0].votes-r.p[1].votes))}</td></tr>`).join(''):'<tr><td colspan="5">Não foi possível carregar os dados estaduais pelo navegador. Consulte o diagnóstico abaixo.</td></tr>';
+  $('status').textContent=`Dados do ${DATES[turn]} consultados; verifique os valores apresentados.`;$('status').className='';
+ }catch(e){$('status').textContent='Conexão oficial não validada';$('status').className='error';$('diagnostic').textContent=e.message+'. Se o navegador bloquear a leitura dos arquivos (CORS), será necessário ajustar a integração; a página não deve ser considerada validada até confirmar os números com o TSE.';if(!lastGood||lastGood.turn!==turn){$('national').innerHTML='<p class="error">Dados oficiais não carregados para este turno. Nenhum resultado fictício será exibido.</p>';$('rr').innerHTML='<p class="note">Aguardando dados oficiais para este turno.</p>';$('states').innerHTML='<tr><td colspan="5">Sem dados confirmados.</td></tr>'}}
+ finally{busy=false}
 }
-$('refresh').addEventListener('click',refresh);$('official').addEventListener('click',()=>window.open('https://resultados.tse.jus.br/oficial/app/index.html','_blank','noopener'));
-refresh();setInterval(refresh,30000);
+$('turn1').addEventListener('click',()=>setTurn(1));$('turn2').addEventListener('click',()=>setTurn(2));$('refresh').addEventListener('click',refresh);$('official').addEventListener('click',()=>window.open('https://resultados.tse.jus.br/oficial/app/index.html','_blank','noopener'));
+setTurn(2);setInterval(refresh,60000);
 </script>
 </body>
 </html>
