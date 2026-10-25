@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#07152f">
+<title>Apuração Presidencial 2026 | MONETIXIABR</title>
+<style>
+:root{color-scheme:dark;--bg:#07152f;--panel:#0e2144;--line:#23436d;--blue:#3b82f6;--green:#10b981;--text:#f8fafc;--muted:#a9bdd8;--gold:#fbbf24}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#102c58 0,#07152f 55%);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+header{padding:26px 18px 20px;text-align:center;border-bottom:1px solid var(--line)}.brand{font-size:.78rem;letter-spacing:.22em;color:#6ee7b7;font-weight:800}.live{display:inline-flex;align-items:center;gap:7px;color:#fecaca;font-size:.75rem;font-weight:800;letter-spacing:.1em}.dot{width:8px;height:8px;border-radius:50%;background:#ef4444;display:inline-block}h1{margin:10px 0 5px;font-size:clamp(1.7rem,4vw,3rem);line-height:1.08}header p{color:var(--muted);margin:8px auto 0;max-width:750px}
+main{max-width:1200px;margin:auto;padding:20px 14px 40px}.status{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;color:var(--muted);font-size:.85rem;margin:0 0 16px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.panel{background:linear-gradient(145deg,rgba(17,39,77,.96),rgba(10,27,54,.96));border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 12px 30px #0002}.panel h2{margin:0 0 14px;font-size:1.08rem}.candidate{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.candidate strong{font-size:1.05rem;display:block}.party,.small{color:var(--muted);font-size:.8rem}.percent{font-size:clamp(1.5rem,4vw,2.4rem);font-weight:850;white-space:nowrap}.bar{height:9px;background:#1e3557;border-radius:20px;overflow:hidden;margin:12px 0}.fill{height:100%;width:0;background:var(--blue);transition:width .3s}.fill.green{background:var(--green)}.votes{font-size:.95rem;font-weight:650}.summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:14px 0}.metric{background:#0b1d3b;border:1px solid var(--line);border-radius:14px;padding:14px}.metric span{display:block;color:var(--muted);font-size:.78rem}.metric strong{display:block;font-size:1.25rem;margin-top:5px}.full{grid-column:1/-1}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:560px}th,td{text-align:left;padding:11px 9px;border-bottom:1px solid #203b61;font-size:.9rem}th{color:#a9bdd8;font-size:.76rem;text-transform:uppercase;letter-spacing:.06em}td:last-child,th:last-child{text-align:right}.state{font-weight:800}.tag{font-size:.72rem;border:1px solid #2d5b86;border-radius:20px;padding:4px 8px;color:#bfdbfe;white-space:nowrap}.note{color:var(--muted);font-size:.82rem;line-height:1.5}.error{color:#fca5a5}.actions{display:flex;gap:8px;flex-wrap:wrap}button{border:1px solid #39618e;background:#16345d;color:white;border-radius:10px;padding:10px 13px;font-weight:700;cursor:pointer}button:hover{background:#214777}a{color:#93c5fd}.source{margin-top:16px}.footer{text-align:center;color:var(--muted);font-size:.78rem;margin:25px 0 0}.skeleton{color:var(--muted)}@media(max-width:700px){.grid{grid-template-columns:1fr}.summary{grid-template-columns:1fr}.percent{font-size:1.7rem}.panel{padding:15px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">MONETIXIABR® • INFORMAÇÃO ELEITORAL</div>
+  <div style="margin-top:13px"><span class="live"><i class="dot"></i> ACOMPANHAMENTO DE RESULTADOS</span></div>
+  <h1>Apuração Presidencial 2026</h1>
+  <p>Dados eleitorais oficiais, com acompanhamento nacional e por estado. Consulte sempre a fonte oficial do Tribunal Superior Eleitoral.</p>
+</header>
+<main>
+  <div class="status"><span id="status">Conectando à fonte oficial do TSE…</span><span>Atualização automática: a cada 30 segundos</span></div>
+  <div class="grid">
+    <section class="panel">
+      <h2>Resultado nacional</h2>
+      <div id="national"><p class="skeleton">Carregando dados oficiais…</p></div>
+      <div class="summary">
+        <div class="metric"><span>Diferença de votos</span><strong id="margin">—</strong></div>
+        <div class="metric"><span>Seções apuradas</span><strong id="sections">—</strong></div>
+        <div class="metric"><span>Comparecimento / apuração</span><strong id="progress">—</strong></div>
+      </div>
+    </section>
+    <section class="panel">
+      <h2>Destaque: Roraima (RR)</h2>
+      <div id="rr"><p class="skeleton">Aguardando dados oficiais…</p></div>
+      <p class="note">O destaque estadual só será preenchido quando a fonte oficial fornecer dados válidos para RR.</p>
+    </section>
+    <section class="panel full">
+      <h2>Apuração por estado</h2>
+      <div class="table-wrap"><table><thead><tr><th>Estado</th><th>Candidato 1</th><th>Candidato 2</th><th>Liderança</th><th>Diferença</th></tr></thead><tbody id="states"><tr><td colspan="5" class="skeleton">Carregando resultados estaduais…</td></tr></tbody></table></div>
+    </section>
+    <section class="panel full">
+      <h2>Verificação da conexão</h2>
+      <p id="diagnostic" class="note">A página ainda está verificando a configuração oficial do TSE. Os resultados não serão simulados nem preenchidos manualmente.</p>
+      <div class="actions"><button id="refresh">Atualizar agora</button><button id="official">Abrir resultados oficiais do TSE</button></div>
+      <p class="note source">Fonte: <a href="https://resultados.tse.jus.br/oficial/app/index.html" target="_blank" rel="noopener">Resultados do TSE</a> · <a href="https://www.tse.jus.br/eleicoes/informacoes-tecnicas-sobre-a-divulgacao-de-resultados" target="_blank" rel="noopener">Documentação técnica de divulgação</a>.</p>
+    </section>
+  </div>
+  <p class="footer">MONETIXIABR® · Página independente de acompanhamento. Não é um canal oficial do TSE. Última tentativa: <span id="updated">—</span></p>
+</main>
+<script>
+const BASE='https://resultados.tse.jus.br/oficial';
+const STATES=[['AC','Acre'],['AL','Alagoas'],['AP','Amapá'],['AM','Amazonas'],['BA','Bahia'],['CE','Ceará'],['DF','Distrito Federal'],['ES','Espírito Santo'],['GO','Goiás'],['MA','Maranhão'],['MT','Mato Grosso'],['MS','Mato Grosso do Sul'],['MG','Minas Gerais'],['PA','Pará'],['PB','Paraíba'],['PR','Paraná'],['PE','Pernambuco'],['PI','Piauí'],['RJ','Rio de Janeiro'],['RN','Rio Grande do Norte'],['RS','Rio Grande do Sul'],['RO','Rondônia'],['RR','Roraima'],['SC','Santa Catarina'],['SP','São Paulo'],['SE','Sergipe'],['TO','Tocantins']];
+const $=id=>document.getElementById(id);
+const fmt=n=>Number(n||0).toLocaleString('pt-BR');
+const pct=n=>(Number(n||0)).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+'%';
+let lastGood=null;
+async function json(url){const r=await fetch(url,{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status+' ao consultar '+url);return r.json()}
+function findVal(obj,keys){for(const k of keys){if(obj&&obj[k]!==undefined&&obj[k]!==null&&obj[k]!=='')return obj[k]}return null}
+function candidatesFrom(data){
+ let arr=data?.cand||data?.candidatos||data?.cands||data?.resultados||[];
+ if(!Array.isArray(arr)&&arr&&typeof arr==='object')arr=Object.values(arr);
+ return arr.filter(x=>x&&typeof x==='object').map(x=>({
+ name:String(findVal(x,['nm','nome','nmu','nomeCandidato','cand'])||'Candidato'),
+ party:String(findVal(x,['cc','partido','sgp','part'])||''),
+ votes:Number(findVal(x,['vap','votos','votosNominais','tv'])||0),
+ percent:Number(String(findVal(x,['pvap','percentual','pct'])||0).replace(',','.'))
+ })).sort((a,b)=>b.votes-a.votes).slice(0,2)
+}
+function renderPair(target,arr){
+ if(!arr||!arr.length){$(target).innerHTML='<p class="note">A fonte ainda não disponibilizou os dados esperados para esta abrangência.</p>';return}
+ const total=arr.reduce((s,c)=>s+c.votes,0);
+ $(target).innerHTML=arr.map((c,i)=>{const p=c.percent|| (total?c.votes/total*100:0);return `<div class="candidate"><div><strong>${esc(c.name)}</strong><div class="party">${esc(c.party)}</div></div><div class="percent">${pct(p)}</div></div><div class="bar"><div class="fill ${i===1?'green':''}" style="width:${Math.max(0,Math.min(100,p))}%"></div></div><div class="votes">${fmt(c.votes)} votos</div>${i===0?'<div style="height:15px"></div>':''}`}).join('');
+}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function getElectionCode(cfg){
+ const arr=cfg?.ele||cfg?.eleicoes||cfg?.elections||[];
+ const list=Array.isArray(arr)?arr:Object.values(arr);
+ const e=list.find(x=>String(x?.cd||x?.codigo||x?.id||'').includes('6258'))||list.find(x=>/2026/.test(JSON.stringify(x))&&/2.?turno|segundo turno/i.test(JSON.stringify(x)));
+ return e?String(findVal(e,['cd','codigo','id'])||''):'';
+}
+async function getConfig(){
+ const urls=[`${BASE}/ele2026/comum/config/ele-c.json`,`${BASE}/comum/config/ele-c.json`];
+ let errors=[];
+ for(const u of urls){try{return {cfg:await json(u),url:u}}catch(e){errors.push(e.message)}}
+ throw new Error('Não foi possível ler a configuração eleitoral oficial pelo navegador. '+errors.join(' | '));
+}
+async function getResult(code,uf){
+ const prefix=uf.toLowerCase();
+ const paths=[
+ `${BASE}/ele2026/${code}/dados/${prefix}/${prefix}-c0001-e${String(code).padStart(6,'0')}-u.json`,
+ `${BASE}/ele2026/${code}/dados/${prefix}/${prefix}-c0001-e${String(code).padStart(6,'0')}-u.json`
+ ];
+ let err;
+ for(const u of paths){try{return await json(u)}catch(e){err=e}}
+ throw err||new Error('Arquivo de resultado não encontrado');
+}
+function getProgress(data){
+ const a=data?.s||data?.secoes||data?.abrangencia||{};
+ const done=findVal(a,['st','secoesTotalizadas','sct']);
+ const total=findVal(a,['se','secoes','secoesEsperadas']);
+ if(done!==null&&total!==null&&Number(total)>0)return {text:`${pct(Number(done)/Number(total)*100)}`,done,total};
+ return {text:'—',done:null,total:null}
+}
+async function refresh(){
+ $('status').textContent='Consultando arquivos oficiais do TSE…';$('updated').textContent=new Date().toLocaleString('pt-BR');
+ try{
+  const {cfg}=await getConfig();
+  let code=getElectionCode(cfg);
+  if(!code) throw new Error('A configuração foi acessada, mas não foi possível identificar automaticamente o código do pleito presidencial de 2026. Para evitar misturar turnos, os números não serão exibidos.');
+  const nat=await getResult(code,'br');
+  const pair=candidatesFrom(nat);
+  if(pair.length<2) throw new Error('O arquivo nacional respondeu, mas o formato dos candidatos não correspondeu ao esperado. Nenhum número foi inventado.');
+  lastGood={nat,pair,code};
+  renderPair('national',pair);
+  $('margin').textContent=fmt(Math.abs(pair[0].votes-pair[1].votes));
+  const prog=getProgress(nat);$('sections').textContent=prog.done!==null?`${fmt(prog.done)} / ${fmt(prog.total)}`:'—';$('progress').textContent=prog.text;
+  $('diagnostic').textContent=`Arquivo nacional acessado. Código eleitoral identificado: ${code}. Os arquivos estaduais serão verificados individualmente.`;
+  $('status').textContent='Fonte oficial consultada com sucesso';$('status').className='';
+  const rows=[];
+  for(const [uf,name] of STATES){
+   try{const d=await getResult(code,uf);const p=candidatesFrom(d);if(p.length>=2){rows.push({uf,name,p});if(uf==='RR')renderPair('rr',p)}}
+   catch(e){/* state data may not yet be available */ }
+  }
+  $('states').innerHTML=rows.length?rows.map(r=>`<tr><td class="state">${r.uf} <span class="small">${esc(r.name)}</span></td><td>${fmt(r.p[0].votes)}<br><span class="small">${pct(r.p[0].percent)}</span></td><td>${fmt(r.p[1].votes)}<br><span class="small">${pct(r.p[1].percent)}</span></td><td><span class="tag">${esc(r.p[0].name)}</span></td><td>${fmt(Math.abs(r.p[0].votes-r.p[1].votes))}</td></tr>`).join(''):'<tr><td colspan="5">Os dados estaduais ainda não estão disponíveis ou o navegador não conseguiu acessá-los.</td></tr>';
+ }catch(e){
+  $('status').textContent='Conexão oficial ainda não validada';$('status').className='error';
+  $('diagnostic').textContent=e.message+' Isso pode ocorrer por bloqueio CORS do navegador, configuração ainda indisponível ou mudança no formato do arquivo. Abra o link oficial para confirmar a apuração.';
+  if(!lastGood){$('national').innerHTML='<p class="error">Dados oficiais não carregados. Nenhum resultado fictício será exibido.</p>';$('rr').innerHTML='<p class="note">Aguardando acesso aos dados oficiais.</p>';$('states').innerHTML='<tr><td colspan="5">Sem dados confirmados.</td></tr>'}
+ }
+}
+$('refresh').addEventListener('click',refresh);$('official').addEventListener('click',()=>window.open('https://resultados.tse.jus.br/oficial/app/index.html','_blank','noopener'));
+refresh();setInterval(refresh,30000);
+</script>
+</body>
+</html>
