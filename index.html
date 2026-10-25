@@ -124,24 +124,6 @@ if(caixaAntiga)caixaAntiga.remove();
     <div style="margin-top:8px;color:#bfdbfe">${pct(p0)} × ${pct(p1)}</div>`;
   $(target).appendChild(caixa);
  }
-
-  const primeiro=arr[0];
-  const segundo=arr[1];
-  const diferenca=Math.abs(Number(primeiro.votes)-Number(segundo.votes));
-  const lider=Number(primeiro.votes)>=Number(segundo.votes)?primeiro:segundo;
-
-  const p0=primeiro.percent||(total?primeiro.votes/total*100:0);
-  const p1=segundo.percent||(total?segundo.votes/total*100:0);
-
-  const caixa=document.createElement('div');
-  caixa.style.cssText='margin-top:18px;padding:18px;border-radius:12px;background:#102c52;border:1px solid #3b82f6;text-align:center';
-  caixa.innerHTML=`
-    <div style="font-size:13px;color:#bfdbfe">DIFERENÇA DE VOTOS NO EXTERIOR</div>
-    <div style="font-size:30px;font-weight:800;color:#fff;margin:8px 0">${fmt(diferenca)}</div>
-    <div style="font-size:15px;color:#dbeafe">Vantagem de ${esc(lider.name)}</div>
-    <div style="margin-top:8px;color:#bfdbfe">${pct(p0)} × ${pct(p1)}</div>`;
-  $(target).appendChild(caixa);
-}
 function progress(data){const s=data?.s||{};return {done:Number(s.st||0),total:Number(s.ts||0),percent:Number(String(s.pst||'0').replace(',','.'))||0}}
 async function getResult(code,uf){
   const u=uf.toLowerCase();
