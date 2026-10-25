@@ -124,6 +124,23 @@ if(caixaAntiga)caixaAntiga.remove();
   $(target).appendChild(caixa);
  }
   }
+  function candidatePhoto(name){
+  const key=String(name||'')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g,'')
+    .toLowerCase()
+    .trim();
+
+  if(key.includes('lula')){
+    return 'https://www.tse.jus.br/imagens/imagens/lula/@@images/image-200-93d51d895f8ebc8900bf3e02c7052bef.png';
+  }
+
+  if(key.includes('flavio bolsonaro')){
+    return 'https://www.tse.jus.br/imagens/imagens/flavio-bolsonaro/@@images/image-200-7092d276831e3453f70c59d07d5c9ae7.png';
+  }
+
+  return '';
+}
 function progress(data){const s=data?.s||{};return {done:Number(s.st||0),total:Number(s.ts||0),percent:Number(String(s.pst||'0').replace(',','.'))||0}}
 async function getResult(code,uf){
   const u=uf.toLowerCase();
@@ -159,7 +176,34 @@ async function refresh(){if(busy)return;busy=true;$('status').textContent=`Consu
   }catch(e){
     $('rr').innerHTML='<p class="note">Dados do Exterior indisponíveis no momento. Tentaremos novamente na próxima atualização.</p>';
   }
-  $('states').innerHTML=rows.length?rows.map(r=>`<tr><td class="state">${r.uf} <span class="small">${esc(r.name)}</span></td><td>${fmt(r.p[0].votes)}<br><span class="small">${pct(r.p[0].percent)}</span></td><td>${fmt(r.p[1].votes)}<br><span class="small">${pct(r.p[1].percent)}</span></td><td><span class="tag">${esc(r.p[0].name)}</span></td><td>${fmt(Math.abs(r.p[0].votes-r.p[1].votes))}</td></tr>`).join(''):'<tr><td colspan="5">Não foi possível carregar os dados estaduais pelo navegador. Consulte o diagnóstico abaixo.</td></tr>';
+  $('states').i
+$('states').innerHTML=rows.length?rows.map(r=>{
+  const a=r.p[0];
+  const b=r.p[1];
+  const fotoA=candidatePhoto(a.name);
+  const fotoB=candidatePhoto(b.name);
+  const lider=a.votes>=b.votes?a:b;
+  const diferenca=Math.abs(a.votes-b.votes);
+
+  const candidato=(c,foto)=>`
+    <div style="display:flex;align-items:center;gap:8px;min-width:150px">
+      ${foto?`<img src="${foto}" alt="Foto de ${esc(c.name)}" style="width:38px;height:44px;object-fit:cover;object-position:top;border-radius:7px;border:1px solid #39618e" onerror="this.style.display='none'">`:''}
+      <div>
+        <strong>${esc(c.name)}</strong>
+        <div class="small">${fmt(c.votes)} votos</div>
+        <div class="small">${pct(c.percent)}</div>
+      </div>
+    </div>`;
+
+  return `<tr>
+    <td class="state">${r.uf} <span class="small">${esc(r.name)}</span></td>
+    <td>${candidato(a,fotoA)}</td>
+    <td>${candidato(b,fotoB)}</td>
+    <td><span class="tag">${esc(lider.name)}</span></td>
+    <td>${fmt(diferenca)}</td>
+  </tr>`;
+}).join(''):'<tr><td colspan="5">Não foi possível carregar os dados estaduais pelo navegador. Consulte o diagnóstico abaixo.</td></tr>';
+
   if(pr.done===0 || Number(nat?.v?.tv||0)===0){
   $('status').textContent=`Aguardando a apuração do ${DATES[turn]}; ainda não há votos totalizados.`;
   $('diagnostic').textContent=`Arquivo oficial do TSE consultado para a eleição ${code}, mas ainda não há votos totalizados.`;
