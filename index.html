@@ -123,7 +123,23 @@ async function refresh(){if(busy)return;busy=true;$('status').textContent=`Consu
   const pr=progress(nat);$('sections').textContent=pr.total?`${fmt(pr.done)} / ${fmt(pr.total)}`:'—';$('progress').textContent=pr.percent?pct(pr.percent):'—';
   $('diagnostic').textContent=`Fonte oficial do TSE consultada. Código da eleição: ${code}. Turno selecionado: ${turn}. Os dados estaduais são consultados separadamente.`;
   const rows=[];
-  for(const [uf,name] of STATES){try{const d=await getResult(code,uf);const p=candidatesFrom(d);if(p.length>=2){rows.push({uf,name,p});if(uf==='RR')renderPair('rr',p)}}catch(e){}}
+  for(const [uf,name] of STATES){
+    try{
+      const d=await getResult(code,uf);
+      const p=candidatesFrom(d);
+      if(p.length>=2){
+        rows.push({uf,name,p});
+      }
+    }catch(e){}
+  }
+
+  try{
+    const exterior=await getResult(code,'zz');
+    const exteriorPair=candidatesFrom(exterior);
+    renderPair('rr',exteriorPair);
+  }catch(e){
+    $('rr').innerHTML='<p class="note">Dados do Exterior indisponíveis no momento. Tentaremos novamente na próxima atualização.</p>';
+  }
   $('states').innerHTML=rows.length?rows.map(r=>`<tr><td class="state">${r.uf} <span class="small">${esc(r.name)}</span></td><td>${fmt(r.p[0].votes)}<br><span class="small">${pct(r.p[0].percent)}</span></td><td>${fmt(r.p[1].votes)}<br><span class="small">${pct(r.p[1].percent)}</span></td><td><span class="tag">${esc(r.p[0].name)}</span></td><td>${fmt(Math.abs(r.p[0].votes-r.p[1].votes))}</td></tr>`).join(''):'<tr><td colspan="5">Não foi possível carregar os dados estaduais pelo navegador. Consulte o diagnóstico abaixo.</td></tr>';
   if(pr.done===0 || Number(nat?.v?.tv||0)===0){
   $('status').textContent=`Aguardando a apuração do ${DATES[turn]}; ainda não há votos totalizados.`;
