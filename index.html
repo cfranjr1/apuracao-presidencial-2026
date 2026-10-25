@@ -106,7 +106,7 @@ if(caixaAntiga)caixaAntiga.remove();
   <div class="votes">${fmt(c.votes)} votos</div>${i===0?'<div style="height:15px"></div>':''}`;
  }).join('');
 
- if(target==='rr' && arr.length>=2){
+ if((target==='rr'||target==='national') && arr.length>=2){
   const primeiro=arr[0];
   const segundo=arr[1];
   const diferenca=Math.abs(Number(primeiro.votes)-Number(segundo.votes));
@@ -118,7 +118,7 @@ if(caixaAntiga)caixaAntiga.remove();
   caixa.style.cssText='margin-top:18px;padding:18px;border-radius:12px;background:#102c52;border:1px solid #3b82f6;text-align:center';
    caixa.className='diferenca-exterior';
   caixa.innerHTML=`
-    <div style="font-size:13px;color:#bfdbfe">DIFERENÇA DE VOTOS NO EXTERIOR</div>
+    <div style="font-size:13px;color:#bfdbfe">${target==='national'?'DIFERENÇA DE VOTOS NO BRASIL':'DIFERENÇA DE VOTOS NO EXTERIOR'}</div>
     <div style="font-size:30px;font-weight:800;color:#fff;margin:8px 0">${fmt(diferenca)}</div>
     <div style="font-size:15px;color:#dbeafe">Vantagem de ${esc(lider.name)}</div>
     <div style="margin-top:8px;color:#bfdbfe">${pct(p0)} × ${pct(p1)}</div>`;
