@@ -124,6 +124,7 @@ if(caixaAntiga)caixaAntiga.remove();
     <div style="margin-top:8px;color:#bfdbfe">${pct(p0)} × ${pct(p1)}</div>`;
   $(target).appendChild(caixa);
  }
+  }
 function progress(data){const s=data?.s||{};return {done:Number(s.st||0),total:Number(s.ts||0),percent:Number(String(s.pst||'0').replace(',','.'))||0}}
 async function getResult(code,uf){
   const u=uf.toLowerCase();
