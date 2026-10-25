@@ -125,7 +125,17 @@ async function refresh(){if(busy)return;busy=true;$('status').textContent=`Consu
   const rows=[];
   for(const [uf,name] of STATES){try{const d=await getResult(code,uf);const p=candidatesFrom(d);if(p.length>=2){rows.push({uf,name,p});if(uf==='RR')renderPair('rr',p)}}catch(e){}}
   $('states').innerHTML=rows.length?rows.map(r=>`<tr><td class="state">${r.uf} <span class="small">${esc(r.name)}</span></td><td>${fmt(r.p[0].votes)}<br><span class="small">${pct(r.p[0].percent)}</span></td><td>${fmt(r.p[1].votes)}<br><span class="small">${pct(r.p[1].percent)}</span></td><td><span class="tag">${esc(r.p[0].name)}</span></td><td>${fmt(Math.abs(r.p[0].votes-r.p[1].votes))}</td></tr>`).join(''):'<tr><td colspan="5">Não foi possível carregar os dados estaduais pelo navegador. Consulte o diagnóstico abaixo.</td></tr>';
-  $('status').textContent=`Dados do ${DATES[turn]} consultados; verifique os valores apresentados.`;$('status').className='';
+  if(pr.done===0 || Number(nat?.v?.tv||0)===0){
+  $('status').textContent=`Aguardando a apuração do ${DATES[turn]}; ainda não há votos totalizados.`;
+  $('diagnostic').textContent=`Arquivo oficial do TSE consultado para a eleição ${code}, mas ainda não há votos totalizados.`;
+}else if(nat?.and==='f'){
+  $('status').textContent=`Apuração do ${DATES[turn]} concluída segundo o TSE.`;
+  $('diagnostic').textContent=`O arquivo oficial do TSE indica totalização final para esta eleição.`;
+}else{
+  $('status').textContent=`Apuração do ${DATES[turn]} em andamento.`;
+  $('diagnostic').textContent=`O TSE já registra votos totalizados. Os números podem mudar conforme a apuração avança.`;
+}
+$('status').className='';
  }catch(e){$('status').textContent='Conexão oficial não validada';$('status').className='error';$('diagnostic').textContent=e.message+'. Se o navegador bloquear a leitura dos arquivos (CORS), será necessário ajustar a integração; a página não deve ser considerada validada até confirmar os números com o TSE.';if(!lastGood||lastGood.turn!==turn){$('national').innerHTML='<p class="error">Dados oficiais não carregados para este turno. Nenhum resultado fictício será exibido.</p>';$('rr').innerHTML='<p class="note">Aguardando dados oficiais para este turno.</p>';$('states').innerHTML='<tr><td colspan="5">Sem dados confirmados.</td></tr>'}}
  finally{busy=false}
 }
