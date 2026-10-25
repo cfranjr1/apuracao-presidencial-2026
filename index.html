@@ -88,6 +88,8 @@ function renderPair(target,arr){
   'flávio bolsonaro':'https://www.tse.jus.br/imagens/imagens/flavio-bolsonaro/@@images/image-200-7092d276831e3453f70c59d07d5c9ae7.png',
   'flavio bolsonaro':'https://www.tse.jus.br/imagens/imagens/flavio-bolsonaro/@@images/image-200-7092d276831e3453f70c59d07d5c9ae7.png'
  };
+  const caixaAntiga=$(target).querySelector('.diferenca-exterior');
+if(caixaAntiga)caixaAntiga.remove();
  $(target).innerHTML=arr.map((c,i)=>{
   const p=c.percent||(total?c.votes/total*100:0);
   const name=String(c.name||'').trim();
@@ -114,6 +116,7 @@ function renderPair(target,arr){
 
   const caixa=document.createElement('div');
   caixa.style.cssText='margin-top:18px;padding:18px;border-radius:12px;background:#102c52;border:1px solid #3b82f6;text-align:center';
+   caixa.className='diferenca-exterior';
   caixa.innerHTML=`
     <div style="font-size:13px;color:#bfdbfe">DIFERENÇA DE VOTOS NO EXTERIOR</div>
     <div style="font-size:30px;font-weight:800;color:#fff;margin:8px 0">${fmt(diferenca)}</div>
